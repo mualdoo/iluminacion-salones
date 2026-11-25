@@ -10,8 +10,10 @@ import type { IconName } from '@/types/ui';
 
 type Props = {
   occupied: boolean;
-  lampOn: boolean;
-  connection: ConnectionStatus;
+  /** null = sin dato (aún no hay información real de la luminaria). */
+  lampOn: boolean | null;
+  /** 'pending' = dispositivo registrado que todavía no se ha conectado. */
+  connection: ConnectionStatus | 'pending';
 };
 
 function StatusRow({ icon, label, children }: { icon: IconName; label: string; children: ReactNode }) {
@@ -28,9 +30,30 @@ function StatusRow({ icon, label, children }: { icon: IconName; label: string; c
   );
 }
 
-export function RoomStatusSection({ occupied, lampOn, connection }: Props) {
-  const connected = connection === 'connected';
+function LampPill({ lampOn }: { lampOn: boolean | null }) {
+  if (lampOn === null) {
+    return <StatePill label="Sin datos" tone="neutral" icon="help-circle-outline" />;
+  }
+  return (
+    <StatePill
+      label={lampOn ? 'Encendida' : 'Apagada'}
+      tone={lampOn ? 'warning' : 'neutral'}
+      icon={lampOn ? 'bulb' : 'bulb-outline'}
+    />
+  );
+}
 
+function ConnectionPill({ connection }: { connection: Props['connection'] }) {
+  if (connection === 'connected') {
+    return <StatePill label="Conectado" tone="success" icon="wifi" />;
+  }
+  if (connection === 'pending') {
+    return <StatePill label="Pendiente" tone="warning" icon="time-outline" />;
+  }
+  return <StatePill label="Desconectado" tone="error" icon="alert-circle-outline" />;
+}
+
+export function RoomStatusSection({ occupied, lampOn, connection }: Props) {
   return (
     <Card title="Estado del salón" icon="home-outline">
       <View style={styles.list}>
@@ -42,18 +65,10 @@ export function RoomStatusSection({ occupied, lampOn, connection }: Props) {
           />
         </StatusRow>
         <StatusRow icon="bulb-outline" label="Iluminación">
-          <StatePill
-            label={lampOn ? 'Encendida' : 'Apagada'}
-            tone={lampOn ? 'warning' : 'neutral'}
-            icon={lampOn ? 'bulb' : 'bulb-outline'}
-          />
+          <LampPill lampOn={lampOn} />
         </StatusRow>
         <StatusRow icon="hardware-chip-outline" label="Dispositivo">
-          <StatePill
-            label={connected ? 'Conectado' : 'Desconectado'}
-            tone={connected ? 'success' : 'error'}
-            icon={connected ? 'wifi' : 'alert-circle-outline'}
-          />
+          <ConnectionPill connection={connection} />
         </StatusRow>
       </View>
     </Card>

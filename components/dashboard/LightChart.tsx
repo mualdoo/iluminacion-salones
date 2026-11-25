@@ -14,64 +14,74 @@ const LABEL_EVERY = 4;
 
 type Props = {
   samples: LightSample[];
+  simulated?: boolean;
 };
 
-export function LightChart({ samples }: Props) {
+export function LightChart({ samples, simulated = true }: Props) {
   const lastIndex = samples.length - 1;
 
   return (
     <Card title="Historial de iluminación" icon="stats-chart-outline">
       <Text style={styles.subtitle}>
-        Nivel en {LIGHT_UNIT} (0–{MAX_LIGHT_LEVEL}) · últimos {samples.length} registros simulados
+        {samples.length === 0
+          ? `Nivel en ${LIGHT_UNIT} (0–${MAX_LIGHT_LEVEL})`
+          : `Nivel en ${LIGHT_UNIT} (0–${MAX_LIGHT_LEVEL}) · últimos ${samples.length} registros ${
+              simulated ? 'simulados' : 'reales'
+            }`}
       </Text>
 
-      <View style={styles.chartWrapper}>
-        <View style={styles.chartRow}>
-          <View style={styles.yAxis}>
-            {Y_TICKS.map((tick) => (
-              <Text key={tick} style={styles.axisLabel}>
-                {tick}
-              </Text>
-            ))}
-          </View>
-
-          <View style={styles.plot}>
-            {Y_TICKS.map((tick) => (
-              <View
-                key={tick}
-                style={[styles.gridLine, { bottom: (tick / MAX_LIGHT_LEVEL) * CHART_HEIGHT }]}
-              />
-            ))}
-            <View style={styles.bars}>
-              {samples.map((sample, index) => {
-                const height = Math.max(2, (sample.value / MAX_LIGHT_LEVEL) * CHART_HEIGHT);
-                return (
-                  <View key={`${index}-${sample.timestamp}`} style={styles.barSlot}>
-                    <View
-                      style={[
-                        styles.bar,
-                        { height, backgroundColor: tones[getLightBand(sample.value).tone].fg },
-                      ]}
-                    />
-                  </View>
-                );
-              })}
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.xRow}>
-          {samples.map((sample, index) => (
-            <View key={`${index}-${sample.timestamp}`} style={styles.xSlot}>
-              {(lastIndex - index) % LABEL_EVERY === 0 ? (
-                <Text style={styles.xLabel} numberOfLines={1}>
-                  {formatClock(sample.timestamp)}
+      {samples.length === 0 ? (
+        <Text style={styles.empty}>Aún no hay mediciones de iluminación para graficar.</Text>
+      ) : (
+        <View style={styles.chartWrapper}>
+          <View style={styles.chartRow}>
+            <View style={styles.yAxis}>
+              {Y_TICKS.map((tick) => (
+                <Text key={tick} style={styles.axisLabel}>
+                  {tick}
                 </Text>
-              ) : null}
+              ))}
             </View>
-          ))}
+
+            <View style={styles.plot}>
+              {Y_TICKS.map((tick) => (
+                <View
+                  key={tick}
+                  style={[styles.gridLine, { bottom: (tick / MAX_LIGHT_LEVEL) * CHART_HEIGHT }]}
+                />
+              ))}
+              <View style={styles.bars}>
+                {samples.map((sample, index) => {
+                  const value = Math.min(MAX_LIGHT_LEVEL, Math.max(0, sample.value));
+                  const height = Math.max(2, (value / MAX_LIGHT_LEVEL) * CHART_HEIGHT);
+                  return (
+                    <View key={`${index}-${sample.timestamp}`} style={styles.barSlot}>
+                      <View
+                        style={[
+                          styles.bar,
+                          { height, backgroundColor: tones[getLightBand(value).tone].fg },
+                        ]}
+                      />
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.xRow}>
+            {samples.map((sample, index) => (
+              <View key={`${index}-${sample.timestamp}`} style={styles.xSlot}>
+                {(lastIndex - index) % LABEL_EVERY === 0 ? (
+                  <Text style={styles.xLabel} numberOfLines={1}>
+                    {formatClock(sample.timestamp)}
+                  </Text>
+                ) : null}
+              </View>
+            ))}
+          </View>
         </View>
-      </View>
+      )}
 
       <View style={styles.legend}>
         {LIGHT_BANDS.map((band) => (
@@ -89,6 +99,7 @@ export function LightChart({ samples }: Props) {
 
 const styles = StyleSheet.create({
   subtitle: { fontSize: 12, color: colors.textMuted },
+  empty: { fontSize: 14, color: colors.textMuted },
   chartWrapper: { paddingRight: 12, gap: spacing.xs },
   chartRow: { flexDirection: 'row', gap: spacing.sm },
   yAxis: {

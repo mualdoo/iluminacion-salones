@@ -3,14 +3,19 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/dashboard/Card';
 import { StatePill } from '@/components/dashboard/StatePill';
+import { OCCUPANCY_WINDOW_MINUTES } from '@/constants/measurements';
 import { colors, spacing, tones } from '@/constants/theme';
+import { formatDateTime } from '@/utils/format';
 
 type Props = {
   motionDetected: boolean;
   occupied: boolean;
+  simulated?: boolean;
+  /** Marca de tiempo (ms) de la última lectura real. */
+  lastReadingAt?: number | null;
 };
 
-export function MotionCard({ motionDetected, occupied }: Props) {
+export function MotionCard({ motionDetected, occupied, simulated = true, lastReadingAt = null }: Props) {
   const tone = tones[motionDetected ? 'info' : 'neutral'];
 
   return (
@@ -23,7 +28,10 @@ export function MotionCard({ motionDetected, occupied }: Props) {
           <Text style={styles.state}>
             {motionDetected ? 'Movimiento detectado' : 'Sin movimiento'}
           </Text>
-          <Text style={styles.sensor}>Sensor PIR (simulado)</Text>
+          <Text style={styles.sensor}>{simulated ? 'Sensor PIR (simulado)' : 'Sensor PIR'}</Text>
+          {!simulated && lastReadingAt ? (
+            <Text style={styles.sensor}>Última lectura: {formatDateTime(lastReadingAt)}</Text>
+          ) : null}
         </View>
       </View>
 
@@ -35,7 +43,9 @@ export function MotionCard({ motionDetected, occupied }: Props) {
         />
       </View>
       <Text style={styles.hint}>
-        Se estima ocupado mientras haya movimiento reciente en el salón.
+        {simulated
+          ? 'Se estima ocupado mientras haya movimiento reciente en el salón.'
+          : `Se estima ocupado si se detectó movimiento en los últimos ${OCCUPANCY_WINDOW_MINUTES} minutos.`}
       </Text>
     </Card>
   );

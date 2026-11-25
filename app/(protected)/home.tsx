@@ -1,27 +1,63 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { LampCard } from '@/components/dashboard/LampCard';
 import { LightChart } from '@/components/dashboard/LightChart';
 import { LightLevelCard } from '@/components/dashboard/LightLevelCard';
 import { MotionCard } from '@/components/dashboard/MotionCard';
+import { RealDashboardContent } from '@/components/dashboard/RealDashboardContent';
+import { RealDataBar } from '@/components/dashboard/RealDataBar';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
 import { RoomStatusSection } from '@/components/dashboard/RoomStatusSection';
 import { SimulationBar } from '@/components/dashboard/SimulationBar';
+import { SourceSwitch } from '@/components/dashboard/SourceSwitch';
+import { ActiveDeviceBar } from '@/components/devices/ActiveDeviceBar';
+import { EmptyState } from '@/components/EmptyState';
 import { FormMessage } from '@/components/FormMessage';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { colors, radius, spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
+import { useDevices } from '@/hooks/useDevices';
 import { useMockDashboard } from '@/hooks/useMockDashboard';
+import { useRealDashboard } from '@/hooks/useRealDashboard';
 import { signOut } from '@/services/auth/authService';
+import type { DataSource } from '@/types/measurements';
 
 export default function HomeScreen() {
+  const router = useRouter();
   const { user } = useAuth();
-  const { snapshot, refresh } = useMockDashboard();
+  const { activeDevice, isLoading: devicesLoading, refreshDevices } = useDevices();
+  const real = useRealDashboard(activeDevice?.id ?? null);
+
+  // null = automático: datos reales si el dispositivo activo tiene mediciones; si no, simulación.
+  const [sourcePref, setSourcePref] = useState<DataSource | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
+
+  const waitingForRealData = !devicesLoading && sourcePref === null && real.isLoading;
+  const source: DataSource = sourcePref ?? (real.data?.hasData ? 'real' : 'simulated');
+
+  // El simulador (y su intervalo) solo existe cuando se está mostrando.
+  const mock = useMockDashboard(source === 'simulated' && !devicesLoading && !waitingForRealData);
+
+  // Mantiene al día el estado y la última conexión del dispositivo.
+  useFocusEffect(
+    useCallback(() => {
+      void refreshDevices();
+    }, [refreshDevices]),
+  );
+
+  const goToDevices = () => router.navigate('/devices');
+
+  const refreshReal = async () => {
+    setIsRefreshing(true);
+    await Promise.all([refreshDevices(), real.refresh()]);
+    setIsRefreshing(false);
+  };
 
   const handleSignOut = async () => {
     setSignOutError(null);
@@ -32,38 +68,106 @@ export default function HomeScreen() {
     if (!result.ok) setSignOutError(result.message);
   };
 
+  const { snapshot } = mock;
+  const showRealError = real.error && (source === 'real' || sourcePref === null);
+
+  const renderBody = () => {
+    if (devicesLoading || waitingForRealData) {
+      return <ActivityIndicator style={styles.loader} color={colors.textMuted} />;
+    }
+
+    if (source === 'simulated') {
+      return (
+        <>
+          <SimulationBar updatedAt={snapshot.updatedAt} onRefresh={mock.refresh} />
+
+          {snapshot.connection === 'disconnected' ? (
+            <View style={styles.notice}>
+              <Ionicons name="alert-circle-outline" size={18} color={colors.warning} />
+              <Text style={styles.noticeText}>
+                Sin conexión con el dispositivo (simulado). Se muestran los últimos valores recibidos.
+              </Text>
+            </View>
+          ) : null}
+
+          <RoomStatusSection
+            occupied={snapshot.occupied}
+            lampOn={snapshot.lampOn}
+            connection={snapshot.connection}
+          />
+          <LightLevelCard level={snapshot.lightLevel} />
+          <MotionCard motionDetected={snapshot.motionDetected} occupied={snapshot.occupied} />
+          <LampCard lampOn={snapshot.lampOn} mode={snapshot.mode} />
+          <LightChart samples={snapshot.history} />
+          <RecentActivity events={snapshot.events} />
+        </>
+      );
+    }
+
+    // Datos reales
+    if (!activeDevice) {
+      return (
+        <EmptyState
+          icon="hardware-chip-outline"
+          title="Selecciona un dispositivo"
+          message="Registra o elige un salón en la pestaña Dispositivos para ver sus mediciones reales."
+          actionLabel="Ir a Dispositivos"
+          onAction={goToDevices}
+        />
+      );
+    }
+
+    if (!real.data) {
+      return real.error ? null : (
+        <ActivityIndicator style={styles.loader} color={colors.textMuted} />
+      );
+    }
+
+    const lastMeasurementAt = real.data.recent[0]
+      ? new Date(real.data.recent[0].recorded_at).getTime()
+      : null;
+
+    return (
+      <>
+        <RealDataBar
+          lastMeasurementAt={lastMeasurementAt}
+          isRefreshing={isRefreshing}
+          onRefresh={refreshReal}
+        />
+        {real.data.hasData ? (
+          <RealDashboardContent data={real.data} device={activeDevice} />
+        ) : (
+          <EmptyState
+            icon="pulse-outline"
+            title="Sin mediciones todavía"
+            message="Este dispositivo aún no tiene mediciones en Supabase. Cuando el ESP32 las envíe, aparecerán aquí. Mientras tanto puedes usar los datos simulados."
+          />
+        )}
+      </>
+    );
+  };
+
   return (
     <ScreenContainer>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          source === 'real' && activeDevice ? (
+            <RefreshControl refreshing={isRefreshing} onRefresh={refreshReal} />
+          ) : undefined
+        }
       >
         <DashboardHeader email={user?.email} onSignOut={handleSignOut} isSigningOut={isSigningOut} />
 
         {signOutError ? <FormMessage type="error" message={signOutError} /> : null}
 
-        <SimulationBar updatedAt={snapshot.updatedAt} onRefresh={refresh} />
+        <ActiveDeviceBar device={activeDevice} onManage={goToDevices} />
+        <SourceSwitch value={source} onChange={setSourcePref} />
 
-        {snapshot.connection === 'disconnected' ? (
-          <View style={styles.notice}>
-            <Ionicons name="alert-circle-outline" size={18} color={colors.warning} />
-            <Text style={styles.noticeText}>
-              Sin conexión con el dispositivo (simulado). Se muestran los últimos valores
-              recibidos.
-            </Text>
-          </View>
-        ) : null}
+        {showRealError ? <FormMessage type="error" message={real.error ?? ''} /> : null}
 
-        <RoomStatusSection
-          occupied={snapshot.occupied}
-          lampOn={snapshot.lampOn}
-          connection={snapshot.connection}
-        />
-        <LightLevelCard level={snapshot.lightLevel} />
-        <MotionCard motionDetected={snapshot.motionDetected} occupied={snapshot.occupied} />
-        <LampCard lampOn={snapshot.lampOn} mode={snapshot.mode} />
-        <LightChart samples={snapshot.history} />
-        <RecentActivity events={snapshot.events} />
+        {renderBody()}
       </ScrollView>
     </ScreenContainer>
   );
@@ -74,6 +178,7 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
     paddingBottom: spacing.xl,
   },
+  loader: { marginTop: spacing.lg },
   notice: {
     flexDirection: 'row',
     alignItems: 'flex-start',

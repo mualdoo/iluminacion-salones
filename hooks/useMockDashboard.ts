@@ -6,7 +6,11 @@ import { REFRESH_INTERVAL_MS } from '@/constants/dashboard';
 import { createInitialSnapshot, generateNextSnapshot } from '@/services/mock/dashboardMockService';
 import type { DashboardSnapshot } from '@/types/dashboard';
 
-export function useMockDashboard() {
+/**
+ * @param enabled Si es false no existe ningún intervalo (por ejemplo, cuando el
+ * panel muestra datos reales).
+ */
+export function useMockDashboard(enabled = true) {
   const [snapshot, setSnapshot] = useState<DashboardSnapshot>(() =>
     createInitialSnapshot(Date.now()),
   );
@@ -15,9 +19,12 @@ export function useMockDashboard() {
     setSnapshot((prev) => generateNextSnapshot(prev, Date.now()));
   }, []);
 
-  // El intervalo solo existe mientras la pantalla está enfocada y la app en primer plano.
+  // El intervalo solo existe mientras la pantalla está enfocada, la app en primer plano
+  // y la simulación habilitada.
   useFocusEffect(
     useCallback(() => {
+      if (!enabled) return undefined;
+
       let intervalId: ReturnType<typeof setInterval> | null = null;
 
       const start = () => {
@@ -42,7 +49,7 @@ export function useMockDashboard() {
         stop();
         subscription.remove();
       };
-    }, [refresh]),
+    }, [refresh, enabled]),
   );
 
   return { snapshot, refresh };
