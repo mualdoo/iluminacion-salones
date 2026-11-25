@@ -7,13 +7,28 @@ import { colors, spacing, tones } from '@/constants/theme';
 import type { OperationMode } from '@/types/dashboard';
 
 type Props = {
-  lampOn: boolean;
-  mode: OperationMode;
+  /** null = sin datos. */
+  lampOn: boolean | null;
+  /** null = sin configuración. */
+  mode: OperationMode | null;
+  simulated?: boolean;
+  pending?: boolean;
+  /** Explica de dónde sale el estado (modo real). */
+  sourceNote?: string | null;
 };
 
-export function LampCard({ lampOn, mode }: Props) {
-  const isAutomatic = mode === 'automatic';
+export function LampCard({
+  lampOn,
+  mode,
+  simulated = true,
+  pending = false,
+  sourceNote = null,
+}: Props) {
   const tone = tones[lampOn ? 'warning' : 'neutral'];
+  const stateLabel =
+    lampOn === null
+      ? 'Sin datos'
+      : `${lampOn ? 'Luz encendida' : 'Luz apagada'}${pending ? ' (pendiente)' : ''}`;
 
   return (
     <Card title="Estado de la luminaria" icon="flash-outline">
@@ -26,20 +41,29 @@ export function LampCard({ lampOn, mode }: Props) {
           />
         </View>
         <View style={styles.texts}>
-          <Text style={styles.state}>{lampOn ? 'Luz encendida' : 'Luz apagada'}</Text>
-          <Text style={styles.sub}>LED del salón (simulado)</Text>
+          <Text style={styles.state}>{stateLabel}</Text>
+          <Text style={styles.sub}>{simulated ? 'LED del salón (simulado)' : 'LED del salón'}</Text>
         </View>
       </View>
 
       <View style={styles.modeRow}>
         <Text style={styles.modeLabel}>Modo de operación</Text>
-        <StatePill
-          label={isAutomatic ? 'Automático' : 'Manual'}
-          tone="info"
-          icon={isAutomatic ? 'sync-outline' : 'hand-left-outline'}
-        />
+        {mode === null ? (
+          <StatePill label="Sin datos" tone="neutral" icon="help-circle-outline" />
+        ) : (
+          <StatePill
+            label={mode === 'automatic' ? 'Automático' : 'Manual'}
+            tone="info"
+            icon={mode === 'automatic' ? 'sync-outline' : 'hand-left-outline'}
+          />
+        )}
       </View>
-      <Text style={styles.hint}>Solo lectura: el control se habilitará en una fase posterior.</Text>
+
+      <Text style={styles.hint}>
+        {simulated
+          ? 'Datos simulados. El control real de la luz está en la pestaña Control.'
+          : (sourceNote ?? 'El control de la luz está en la pestaña Control.')}
+      </Text>
     </Card>
   );
 }

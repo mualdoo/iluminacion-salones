@@ -13,7 +13,7 @@ export default function ProtectedLayout() {
           tabBarActiveTintColor: colors.warning,
           tabBarInactiveTintColor: colors.textMuted,
           tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
-          tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
+          tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         }}
       >
         <Tabs.Screen
@@ -47,7 +47,24 @@ export default function ProtectedLayout() {
           options={{
             title: 'Historial',
             tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons name={focused ? 'time' : 'time-outline'} size={size} color={String(color)} />
+              <Ionicons
+                name={focused ? 'time' : 'time-outline'}
+                size={size}
+                color={String(color)}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="control"
+          options={{
+            title: 'Control',
+            tabBarIcon: ({ color, size, focused }) => (
+              <Ionicons
+                name={focused ? 'toggle' : 'toggle-outline'}
+                size={size}
+                color={String(color)}
+              />
             ),
           }}
         />

@@ -10,8 +10,10 @@ import type { IconName } from '@/types/ui';
 
 type Props = {
   occupied: boolean;
-  /** null = sin dato (aún no hay información real de la luminaria). */
+  /** null = sin dato. */
   lampOn: boolean | null;
+  /** true si el estado de la luminaria viene de un comando aún no ejecutado. */
+  lampPending?: boolean;
   /** 'pending' = dispositivo registrado que todavía no se ha conectado. */
   connection: ConnectionStatus | 'pending';
 };
@@ -30,13 +32,14 @@ function StatusRow({ icon, label, children }: { icon: IconName; label: string; c
   );
 }
 
-function LampPill({ lampOn }: { lampOn: boolean | null }) {
+function LampPill({ lampOn, pending }: { lampOn: boolean | null; pending: boolean }) {
   if (lampOn === null) {
     return <StatePill label="Sin datos" tone="neutral" icon="help-circle-outline" />;
   }
+  const suffix = pending ? ' (pendiente)' : '';
   return (
     <StatePill
-      label={lampOn ? 'Encendida' : 'Apagada'}
+      label={`${lampOn ? 'Encendida' : 'Apagada'}${suffix}`}
       tone={lampOn ? 'warning' : 'neutral'}
       icon={lampOn ? 'bulb' : 'bulb-outline'}
     />
@@ -53,7 +56,7 @@ function ConnectionPill({ connection }: { connection: Props['connection'] }) {
   return <StatePill label="Desconectado" tone="error" icon="alert-circle-outline" />;
 }
 
-export function RoomStatusSection({ occupied, lampOn, connection }: Props) {
+export function RoomStatusSection({ occupied, lampOn, lampPending = false, connection }: Props) {
   return (
     <Card title="Estado del salón" icon="home-outline">
       <View style={styles.list}>
@@ -65,7 +68,7 @@ export function RoomStatusSection({ occupied, lampOn, connection }: Props) {
           />
         </StatusRow>
         <StatusRow icon="bulb-outline" label="Iluminación">
-          <LampPill lampOn={lampOn} />
+          <LampPill lampOn={lampOn} pending={lampPending} />
         </StatusRow>
         <StatusRow icon="hardware-chip-outline" label="Dispositivo">
           <ConnectionPill connection={connection} />

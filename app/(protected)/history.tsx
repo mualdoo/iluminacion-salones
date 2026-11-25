@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, type ReactElement } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { ActiveDeviceBar } from '@/components/devices/ActiveDeviceBar';
@@ -59,7 +59,7 @@ export default function HistoryScreen() {
     </View>
   );
 
-  let empty = null;
+  let empty: ReactElement | null = null;
   if (devicesLoading || measurements.isLoading) {
     empty = <ActivityIndicator style={styles.loader} color={colors.textMuted} />;
   } else if (activeDevice && !measurements.error) {
@@ -88,9 +88,9 @@ export default function HistoryScreen() {
         ListHeaderComponent={header}
         ListEmptyComponent={() => empty}
         ListFooterComponent={() =>
-            measurements.isLoadingMore ? (
-                <ActivityIndicator style={styles.footer} color={colors.textMuted} />
-            ) : null
+          measurements.isLoadingMore ? (
+            <ActivityIndicator style={styles.footer} color={colors.textMuted} />
+          ) : null
         }
         onEndReached={measurements.loadMore}
         onEndReachedThreshold={0.4}
