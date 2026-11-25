@@ -6,6 +6,8 @@ export const colors = {
   textMuted: '#5F6B7A',
   success: '#2E9E5B',
   successSoft: '#E3F5EA',
+  error: '#C62828',
+  errorSoft: '#FDECEA',
   border: '#E1E5EB',
 } as const;
 
