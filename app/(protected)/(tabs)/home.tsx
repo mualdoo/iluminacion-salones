@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AlertsSection } from '@/components/dashboard/AlertsSection';
@@ -15,6 +15,7 @@ import { RecentActivity } from '@/components/dashboard/RecentActivity';
 import { RoomStatusSection } from '@/components/dashboard/RoomStatusSection';
 import { SimulationBar } from '@/components/dashboard/SimulationBar';
 import { SourceSwitch } from '@/components/dashboard/SourceSwitch';
+import { StatsLinkCard } from '@/components/dashboard/StatsLinkCard';
 import { ActiveDeviceBar } from '@/components/devices/ActiveDeviceBar';
 import { EmptyState } from '@/components/EmptyState';
 import { FormMessage } from '@/components/FormMessage';
@@ -22,6 +23,7 @@ import { ScreenContainer } from '@/components/ScreenContainer';
 import { SIMULATED_LIGHT_THRESHOLD } from '@/constants/control';
 import { colors, radius, spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
+import { useDeviceAnalytics } from '@/hooks/useDeviceAnalytics';
 import { useDeviceCommands } from '@/hooks/useDeviceCommands';
 import { useDeviceConfiguration } from '@/hooks/useDeviceConfiguration';
 import { useDevices } from '@/hooks/useDevices';
@@ -30,6 +32,8 @@ import { useRealDashboard } from '@/hooks/useRealDashboard';
 import { signOut } from '@/services/auth/authService';
 import type { DataSource } from '@/types/measurements';
 import { evaluateDeviceAlerts } from '@/utils/alerts';
+import { computeDeviceStats } from '@/utils/analytics';
+import { generateDeviceRecommendations } from '@/utils/recommendations';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -53,6 +57,20 @@ export default function HomeScreen() {
   // El simulador (y su intervalo) solo existe cuando se está mostrando.
   const mock = useMockDashboard(source === 'simulated' && !devicesLoading && !waitingForRealData);
 
+  // Analítica de las últimas 24 h, solo en modo real, para destacar la recomendación principal.
+  const analytics = useDeviceAnalytics(source === 'real' ? deviceId : null, 'day');
+  const cfg = configuration.configuration;
+  const topRecommendation = useMemo(() => {
+    if (!analytics.data) return null;
+    const stats = computeDeviceStats({
+      measurements: analytics.data.measurements,
+      commands: analytics.data.commands,
+      threshold: cfg?.light_threshold ?? null,
+      automaticMode: cfg ? cfg.automatic_mode : null,
+    });
+    return generateDeviceRecommendations({ stats, configuration: cfg })[0] ?? null;
+  }, [analytics.data, cfg]);
+
   // Mantiene al día el estado y la última conexión del dispositivo.
   useFocusEffect(
     useCallback(() => {
@@ -61,6 +79,7 @@ export default function HomeScreen() {
   );
 
   const goToDevices = () => router.navigate('/devices');
+  const goToStats = () => router.navigate('/stats');
 
   const refreshReal = async () => {
     setIsRefreshing(true);
@@ -69,6 +88,7 @@ export default function HomeScreen() {
       real.refresh(),
       configuration.refresh(),
       commands.refresh(),
+      analytics.refresh(),
     ]);
     setIsRefreshing(false);
   };
@@ -198,6 +218,13 @@ export default function HomeScreen() {
 
         <ActiveDeviceBar device={activeDevice} onManage={goToDevices} />
         <SourceSwitch value={source} onChange={setSourcePref} />
+
+        {activeDevice ? (
+          <StatsLinkCard
+            recommendation={source === 'real' ? topRecommendation : null}
+            onPress={goToStats}
+          />
+        ) : null}
 
         {showRealError ? <FormMessage type="error" message={real.error ?? ''} /> : null}
 

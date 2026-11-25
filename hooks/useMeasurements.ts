@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { HISTORY_PAGE_SIZE } from '@/constants/measurements';
 import { fetchMeasurements } from '@/services/measurements/measurementService';
 import type { Measurement } from '@/types/database';
-import type { MeasurementTypeFilter, TimeRangeKey } from '@/types/measurements';
+import type { MeasurementFilters } from '@/types/history';
 import { getRangeStart } from '@/utils/measurements';
 
 type State = {
@@ -14,12 +14,11 @@ type State = {
   error: string | null;
 };
 
-export function useMeasurements(
-  deviceId: string | null,
-  type: MeasurementTypeFilter,
-  range: TimeRangeKey,
-) {
-  const key = deviceId ? `${deviceId}|${type}|${range}` : null;
+export function useMeasurements(deviceId: string | null, filters: MeasurementFilters) {
+  const { type, range, valueFilter, sort, threshold } = filters;
+  const key = deviceId
+    ? [deviceId, type, range, valueFilter, sort, threshold ?? 'none'].join('|')
+    : null;
 
   const [state, setState] = useState<State>({ key: null, items: [], hasMore: false, error: null });
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -45,7 +44,10 @@ export function useMeasurements(
       const result = await fetchMeasurements({
         deviceId,
         type,
+        valueFilter,
+        threshold,
         since,
+        ascending: sort === 'asc',
         offset: 0,
         limit: HISTORY_PAGE_SIZE,
       });
@@ -70,7 +72,7 @@ export function useMeasurements(
         }));
       }
     },
-    [deviceId, type, range, key],
+    [deviceId, type, range, valueFilter, sort, threshold, key],
   );
 
   // Carga al enfocar la pestaña y cada vez que cambian dispositivo o filtros.
@@ -88,7 +90,10 @@ export function useMeasurements(
     const result = await fetchMeasurements({
       deviceId,
       type,
+      valueFilter,
+      threshold,
       since: sinceRef.current,
+      ascending: sort === 'asc',
       offset: items.length,
       limit: HISTORY_PAGE_SIZE,
     });
@@ -110,7 +115,7 @@ export function useMeasurements(
     } else {
       setState((prev) => (prev.key === key ? { ...prev, error: result.message } : prev));
     }
-  }, [deviceId, key, isCurrent, hasMore, isLoadingMore, type, items.length]);
+  }, [deviceId, key, isCurrent, hasMore, isLoadingMore, type, valueFilter, threshold, sort, items.length]);
 
   const refresh = useCallback(() => load(true), [load]);
 

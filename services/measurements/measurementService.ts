@@ -1,16 +1,18 @@
+import { EXPORT_PAGE_SIZE } from '@/constants/analytics';
 import {
-    DASHBOARD_LIGHT_SAMPLES,
-    DASHBOARD_MOTION_SAMPLES,
-    DASHBOARD_RECENT_COUNT,
+  DASHBOARD_LIGHT_SAMPLES,
+  DASHBOARD_MOTION_SAMPLES,
+  DASHBOARD_RECENT_COUNT,
 } from '@/constants/measurements';
 import { getSupabaseClient } from '@/services/supabase/client';
 import type { LightSample } from '@/types/dashboard';
 import type { Measurement, MeasurementType } from '@/types/database';
+import type { ValueFilter } from '@/types/history';
 import type { MeasurementTypeFilter, RealDashboardData } from '@/types/measurements';
 import type { ServiceResult } from '@/types/service';
 import { GENERIC_ERROR, translatePostgrestError } from '@/utils/supabaseErrors';
 
-const COLUMNS = 'id, device_id, measurement_type, value, recorded_at';
+export const MEASUREMENT_COLUMNS = 'id, device_id, measurement_type, value, recorded_at';
 
 type Row = {
   id: string;
@@ -28,26 +30,45 @@ const toMeasurement = (row: Row): Measurement => ({
   recorded_at: row.recorded_at,
 });
 
-const toMeasurements = (rows: unknown): Measurement[] => ((rows ?? []) as Row[]).map(toMeasurement);
+export const toMeasurements = (rows: unknown): Measurement[] =>
+  ((rows ?? []) as Row[]).map(toMeasurement);
 
 export type MeasurementQuery = {
   deviceId: string;
   type: MeasurementTypeFilter;
+  /** Solo se aplica si type es 'light' o 'motion'. */
+  valueFilter: ValueFilter;
+  /** light_threshold, necesario para los filtros "bajo/sobre umbral". */
+  threshold: number | null;
   /** Fecha ISO mínima de recorded_at, o null para todo el historial. */
   since: string | null;
+  ascending: boolean;
   offset: number;
   limit: number;
 };
 
 export async function fetchMeasurements(q: MeasurementQuery): Promise<ServiceResult<Measurement[]>> {
   try {
-    let query = getSupabaseClient().from('measurements').select(COLUMNS).eq('device_id', q.deviceId);
+    let query = getSupabaseClient()
+      .from('measurements')
+      .select(MEASUREMENT_COLUMNS)
+      .eq('device_id', q.deviceId);
+
     if (q.type !== 'all') query = query.eq('measurement_type', q.type);
     if (q.since) query = query.gte('recorded_at', q.since);
 
+    if (q.type === 'light' && q.threshold !== null) {
+      if (q.valueFilter === 'below') query = query.lt('value', q.threshold);
+      else if (q.valueFilter === 'above') query = query.gte('value', q.threshold);
+    }
+    if (q.type === 'motion') {
+      if (q.valueFilter === 'detected') query = query.eq('value', 1);
+      else if (q.valueFilter === 'none') query = query.eq('value', 0);
+    }
+
     const { data, error } = await query
-      .order('recorded_at', { ascending: false })
-      .order('id', { ascending: false })
+      .order('recorded_at', { ascending: q.ascending })
+      .order('id', { ascending: q.ascending })
       .range(q.offset, q.offset + q.limit - 1);
 
     if (error) return { ok: false, message: translatePostgrestError(error) };
@@ -57,12 +78,34 @@ export async function fetchMeasurements(q: MeasurementQuery): Promise<ServiceRes
   }
 }
 
+/** Trae el historial con los filtros indicados, en páginas, hasta maxRows filas. */
+export async function fetchMeasurementsForExport(
+  base: Omit<MeasurementQuery, 'offset' | 'limit'>,
+  maxRows: number,
+): Promise<ServiceResult<{ rows: Measurement[]; truncated: boolean }>> {
+  const rows: Measurement[] = [];
+
+  while (rows.length < maxRows) {
+    const limit = Math.min(EXPORT_PAGE_SIZE, maxRows - rows.length);
+    const page = await fetchMeasurements({ ...base, offset: rows.length, limit });
+    if (!page.ok) return page;
+    rows.push(...page.data);
+    if (page.data.length < limit) return { ok: true, data: { rows, truncated: false } };
+  }
+
+  // Se llegó al máximo: una consulta extra confirma si había más filas.
+  const probe = await fetchMeasurements({ ...base, offset: rows.length, limit: 1 });
+  if (!probe.ok) return probe;
+  return { ok: true, data: { rows, truncated: probe.data.length > 0 } };
+}
+
 export async function fetchDashboardMeasurements(
   deviceId: string,
 ): Promise<ServiceResult<RealDashboardData>> {
   try {
     const supabase = getSupabaseClient();
-    const base = () => supabase.from('measurements').select(COLUMNS).eq('device_id', deviceId);
+    const base = () =>
+      supabase.from('measurements').select(MEASUREMENT_COLUMNS).eq('device_id', deviceId);
 
     const [light, motion, lastMotion] = await Promise.all([
       base()
