@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/dashboard/Card';
 import { StatePill } from '@/components/dashboard/StatePill';
-import { OCCUPANCY_WINDOW_MINUTES } from '@/constants/measurements';
+import { OCCUPANCY_WINDOW_SECONDS } from '@/constants/measurements';
 import { colors, spacing, tones } from '@/constants/theme';
 import { formatDateTime } from '@/utils/format';
 
@@ -45,7 +45,7 @@ export function MotionCard({ motionDetected, occupied, simulated = true, lastRea
       <Text style={styles.hint}>
         {simulated
           ? 'Se estima ocupado mientras haya movimiento reciente en el salón.'
-          : `Se estima ocupado si se detectó movimiento en los últimos ${OCCUPANCY_WINDOW_MINUTES} minutos.`}
+          : `Se estima ocupado si se detectó movimiento en los últimos ${OCCUPANCY_WINDOW_SECONDS} segundos.`}
       </Text>
     </Card>
   );

@@ -1,5 +1,5 @@
 import { COMMAND_RECENT_MINUTES, COMMAND_TYPE_SET_LIGHT } from '@/constants/control';
-import { OCCUPANCY_WINDOW_MINUTES } from '@/constants/measurements';
+import { OCCUPANCY_WINDOW_SECONDS } from '@/constants/measurements';
 import type { DeviceAlert } from '@/types/alerts';
 import type { LampState } from '@/types/control';
 import type { Command, Configuration, Device } from '@/types/database';
@@ -7,7 +7,7 @@ import type { RealDashboardData } from '@/types/measurements';
 import { evaluateDeviceAlerts } from '@/utils/alerts';
 import { formatDateTime } from '@/utils/format';
 
-const MINUTE_MS = 60_000;
+const SECOND_MS = 1_000;
 
 /** Ocupado si hubo movimiento (valor 1) dentro de la ventana de ocupación. */
 export function estimateOccupied(
@@ -15,7 +15,7 @@ export function estimateOccupied(
 ): boolean {
   return (
     data.lastMotionDetectedAt !== null &&
-    data.fetchedAt - data.lastMotionDetectedAt <= OCCUPANCY_WINDOW_MINUTES * MINUTE_MS
+    data.fetchedAt - data.lastMotionDetectedAt <= OCCUPANCY_WINDOW_SECONDS * SECOND_MS
   );
 }
 
@@ -54,7 +54,7 @@ export function deriveLampState(input: LampInput): LampState {
   // 2. Último comando ejecutado. En automático solo cuenta si es reciente.
   if (latestExecuted) {
     const executedAt = Date.parse(latestExecuted.executed_at ?? latestExecuted.created_at);
-    const isRecent = input.now - executedAt <= COMMAND_RECENT_MINUTES * MINUTE_MS;
+    const isRecent = input.now - executedAt <= COMMAND_RECENT_MINUTES * SECOND_MS;
     if (!isAutomatic || isRecent) {
       return {
         on: latestExecuted.value === 'on',

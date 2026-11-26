@@ -1,0 +1,4 @@
+# Agrega este bloque al final de supabase/config.toml
+[functions.esp32-sync]
+# El ESP32 no usa un JWT de Supabase: la función valida x-device-token.
+verify_jwt = false
