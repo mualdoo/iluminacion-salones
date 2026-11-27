@@ -40,7 +40,6 @@ export function LampCard({
         </View>
         <View style={styles.texts}>
           <Text style={styles.state}>{stateLabel}</Text>
-          <Text style={styles.sub}>LED del salón</Text>
         </View>
       </View>
 
@@ -56,10 +55,6 @@ export function LampCard({
           />
         )}
       </View>
-
-      <Text style={styles.hint}>
-        {sourceNote ?? 'El control de la luz está en la pestaña Control.'}
-      </Text>
     </Card>
   );
 }

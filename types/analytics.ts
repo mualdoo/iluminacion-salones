@@ -33,7 +33,7 @@ export type MotionStats = {
   samples: number;
   detected: number;
   presencePct: number | null;
-  /** Ej. "10:00 – 12:00"; null = sin suficiente actividad. */
+  /** Ej. "10:00 - 12:00"; null = sin suficiente actividad. */
   peakWindow: string | null;
 };
 

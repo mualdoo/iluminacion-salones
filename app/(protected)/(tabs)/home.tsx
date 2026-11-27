@@ -5,7 +5,6 @@ import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet } from 'react
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { RealDashboardContent } from '@/components/dashboard/RealDashboardContent';
 import { RealDataBar } from '@/components/dashboard/RealDataBar';
-import { StatsLinkCard } from '@/components/dashboard/StatsLinkCard';
 import { ActiveDeviceBar } from '@/components/devices/ActiveDeviceBar';
 import { EmptyState } from '@/components/EmptyState';
 import { FormMessage } from '@/components/FormMessage';
@@ -147,9 +146,9 @@ export default function HomeScreen() {
 
         <ActiveDeviceBar device={activeDevice} onManage={goToDevices} />
 
-        {activeDevice ? (
+        {/* {activeDevice ? (
           <StatsLinkCard recommendation={topRecommendation} onPress={goToStats} />
-        ) : null}
+        ) : null} */}
 
         {real.error ? <FormMessage type="error" message={real.error} /> : null}
 

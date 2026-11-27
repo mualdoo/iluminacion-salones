@@ -36,7 +36,7 @@ function LampPill({ lampOn, pending }: { lampOn: boolean | null; pending: boolea
   if (lampOn === null) {
     return <StatePill label="Sin datos" tone="neutral" icon="help-circle-outline" />;
   }
-  const suffix = pending ? ' (pendiente)' : '';
+  const suffix = pending ? ' (P)' : '';
   return (
     <StatePill
       label={`${lampOn ? 'Encendida' : 'Apagada'}${suffix}`}
@@ -67,7 +67,7 @@ export function RoomStatusSection({ occupied, lampOn, lampPending = false, conne
             icon={occupied ? 'people' : 'people-outline'}
           />
         </StatusRow>
-        <StatusRow icon="bulb-outline" label="Iluminación">
+        <StatusRow icon="bulb-outline" label="Luz">
           <LampPill lampOn={lampOn} pending={lampPending} />
         </StatusRow>
         <StatusRow icon="hardware-chip-outline" label="Dispositivo">

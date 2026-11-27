@@ -10,9 +10,9 @@ export function formatClock(timestamp: number): string {
 type LightBand = { label: string; range: string; min: number; tone: Tone };
 
 export const LIGHT_BANDS: readonly LightBand[] = [
-  { label: 'Baja', range: '0–249', min: 0, tone: 'warning' },
-  { label: 'Media', range: '250–599', min: 250, tone: 'info' },
-  { label: 'Alta', range: '600–1000', min: 600, tone: 'success' },
+  { label: 'Baja', range: '0-249', min: 0, tone: 'warning' },
+  { label: 'Media', range: '250-599', min: 250, tone: 'info' },
+  { label: 'Alta', range: '600-1000', min: 600, tone: 'success' },
 ];
 
 export function getLightBand(value: number): LightBand {

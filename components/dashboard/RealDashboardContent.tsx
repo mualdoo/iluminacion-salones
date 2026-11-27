@@ -45,14 +45,14 @@ export function RealDashboardContent({ data, device, configuration, commands }: 
 
   return (
     <>
-      <AlertsSection alerts={alerts} />
-
       <RoomStatusSection
         occupied={isOccupied}
         lampOn={lamp.on}
         lampPending={lamp.pending}
         connection={connection}
       />
+      
+      <AlertsSection alerts={alerts} />
 
       {data.latestLight ? (
         <LightLevelCard

@@ -1,15 +1,15 @@
 import {
-    ANALYTICS_PERIODS,
-    PEAK_MIN_EVENTS,
-    PEAK_WINDOW_HOURS,
-    TIME_BANDS,
+  ANALYTICS_PERIODS,
+  PEAK_MIN_EVENTS,
+  PEAK_WINDOW_HOURS,
+  TIME_BANDS,
 } from '@/constants/analytics';
 import { COMMAND_TYPE_SET_LIGHT } from '@/constants/control';
 import type {
-    AnalyticsPeriod,
-    DeviceStats,
-    StatsInput,
-    TimeBandKey,
+  AnalyticsPeriod,
+  DeviceStats,
+  StatsInput,
+  TimeBandKey,
 } from '@/types/analytics';
 import type { Measurement } from '@/types/database';
 
@@ -44,7 +44,7 @@ const percent = (part: number, total: number): number | null =>
 
 function formatWindow(index: number): string {
   const start = index * PEAK_WINDOW_HOURS;
-  return `${pad(start)}:00 – ${pad(start + PEAK_WINDOW_HOURS)}:00`;
+  return `${pad(start)}:00 - ${pad(start + PEAK_WINDOW_HOURS)}:00`;
 }
 
 type BandAccumulator = { lightSum: number; lightCount: number; detected: number; samples: number };

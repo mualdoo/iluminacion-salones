@@ -1,8 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/dashboard/Card';
-import { LIGHT_UNIT, MAX_LIGHT_LEVEL } from '@/constants/dashboard';
+import { MAX_LIGHT_LEVEL } from '@/constants/dashboard';
 import { colors, radius, spacing, tones } from '@/constants/theme';
 import { getLightBand } from '@/utils/dashboard';
 import { formatDateTime } from '@/utils/format';
@@ -19,7 +18,7 @@ export function LightLevelCard({ level, measuredAt = null }: Props) {
   const percent = Math.round((clamped / MAX_LIGHT_LEVEL) * 100);
 
   return (
-    <Card title="Nivel de iluminación" icon="sunny-outline">
+    <Card title="Iluminación" icon="sunny-outline">
       <Text style={[styles.level, { color: tones[band.tone].fg }]}>{band.label}</Text>
 
       <View>
@@ -28,21 +27,9 @@ export function LightLevelCard({ level, measuredAt = null }: Props) {
             style={[styles.fill, { width: `${percent}%`, backgroundColor: tones[band.tone].fg }]}
           />
         </View>
-        <View style={styles.scale}>
-          <Text style={styles.scaleLabel}>0</Text>
-          <Text style={styles.scaleLabel}>{MAX_LIGHT_LEVEL / 2}</Text>
-          <Text style={styles.scaleLabel}>{MAX_LIGHT_LEVEL}</Text>
-        </View>
       </View>
 
       {measuredAt ? <Text style={styles.caption}>Medición: {formatDateTime(measuredAt)}</Text> : null}
-
-      <View style={styles.note}>
-        <Ionicons name="information-circle-outline" size={16} color={colors.info} />
-        <Text style={styles.noteText}>
-          Valor del sensor en unidades relativas ({LIGHT_UNIT}). Aún no está calibrado en lux.
-        </Text>
-      </View>
     </Card>
   );
 }

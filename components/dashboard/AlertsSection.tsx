@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/dashboard/Card';
-import { StatePill } from '@/components/dashboard/StatePill';
 import { colors, spacing, tones } from '@/constants/theme';
 import type { DeviceAlert } from '@/types/alerts';
 import { ALERT_SEVERITY_META } from '@/utils/alerts';
@@ -21,7 +20,7 @@ export function AlertsSection({ alerts, showWhenEmpty = false }: Props) {
       <Card title="Alertas" icon="notifications-outline">
         <View style={styles.okRow}>
           <Ionicons name="checkmark-circle" size={20} color={colors.success} />
-          <Text style={styles.okText}>Sin alertas activas.</Text>
+          <Text style={styles.okText}>Sin alertas.</Text>
         </View>
       </Card>
     );
@@ -29,14 +28,8 @@ export function AlertsSection({ alerts, showWhenEmpty = false }: Props) {
 
   return (
     <Card
-      title="Alertas activas"
+      title="Alertas"
       icon="notifications-outline"
-      right={
-        <StatePill
-          label={`${alerts.length} ${alerts.length === 1 ? 'alerta' : 'alertas'}`}
-          tone="warning"
-        />
-      }
     >
       <View>
         {alerts.map((alert, index) => {
@@ -53,10 +46,8 @@ export function AlertsSection({ alerts, showWhenEmpty = false }: Props) {
               <View style={styles.texts}>
                 <View style={styles.titleRow}>
                   <Text style={styles.title}>{alert.title}</Text>
-                  <Text style={styles.time}>{formatClock(alert.timestamp)}</Text>
                 </View>
-                <Text style={styles.description}>{alert.description}</Text>
-                <StatePill label={meta.label} tone={meta.tone} />
+                <Text style={styles.time}>{formatClock(alert.timestamp)}</Text>
               </View>
             </View>
           );

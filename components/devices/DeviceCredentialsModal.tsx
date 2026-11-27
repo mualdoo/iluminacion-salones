@@ -131,9 +131,7 @@ export function DeviceCredentialsModal({ device, onClose }: Props) {
                     </View>
                   </View>
                   <Text style={styles.note}>
-                    Pega estos valores en firmware/esp32_iluminacion/secrets.h y cárgalos en tu
-                    ESP32. Quien tenga el token puede enviar mediciones como este dispositivo:
-                    no lo compartas.
+                    No compartas este token.
                   </Text>
                 </>
               ) : alreadyProvisioned ? (

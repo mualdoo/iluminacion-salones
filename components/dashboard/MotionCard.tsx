@@ -2,8 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/dashboard/Card';
-import { StatePill } from '@/components/dashboard/StatePill';
-import { OCCUPANCY_WINDOW_SECONDS } from '@/constants/measurements';
 import { colors, spacing, tones } from '@/constants/theme';
 import { formatDateTime } from '@/utils/format';
 
@@ -15,35 +13,23 @@ type Props = {
 };
 
 export function MotionCard({ motionDetected, occupied, lastReadingAt = null }: Props) {
-  const tone = tones[motionDetected ? 'info' : 'neutral'];
+  const tone = tones[occupied ? 'info' : 'neutral'];
 
   return (
-    <Card title="Detección de movimiento" icon="walk-outline">
+    <Card title="Movimiento" icon="walk-outline">
       <View style={styles.main}>
         <View style={[styles.circle, { backgroundColor: tone.bg }]}>
-          <Ionicons name={motionDetected ? 'walk' : 'walk-outline'} size={32} color={tone.fg} />
+          <Ionicons name={occupied ? 'walk' : 'walk-outline'} size={32} color={tone.fg} />
         </View>
         <View style={styles.texts}>
           <Text style={styles.state}>
-            {motionDetected ? 'Movimiento detectado' : 'Sin movimiento'}
+            {occupied ? 'Ocupado' : 'Desocupado'}
           </Text>
-          <Text style={styles.sensor}>Sensor PIR</Text>
           {lastReadingAt ? (
             <Text style={styles.sensor}>Última lectura: {formatDateTime(lastReadingAt)}</Text>
           ) : null}
         </View>
       </View>
-
-      <View style={styles.occupancyRow}>
-        <Text style={styles.occupancyLabel}>Ocupación estimada</Text>
-        <StatePill
-          label={occupied ? 'Ocupado' : 'Desocupado'}
-          tone={occupied ? 'info' : 'neutral'}
-        />
-      </View>
-      <Text style={styles.hint}>
-        Se estima ocupado si se detectó movimiento en los últimos ${OCCUPANCY_WINDOW_SECONDS} segundos.
-      </Text>
     </Card>
   );
 }

@@ -13,9 +13,9 @@ export const ANALYTICS_PERIODS: ReadonlyArray<{
 ];
 
 export const TIME_BANDS: ReadonlyArray<{ key: TimeBandKey; label: string; range: string }> = [
-  { key: 'morning', label: 'Mañana', range: '06:00 – 12:00' },
-  { key: 'afternoon', label: 'Tarde', range: '12:00 – 19:00' },
-  { key: 'night', label: 'Noche', range: '19:00 – 06:00' },
+  { key: 'morning', label: 'Mañana', range: '06:00 - 12:00' },
+  { key: 'afternoon', label: 'Tarde', range: '12:00 - 19:00' },
+  { key: 'night', label: 'Noche', range: '19:00 - 06:00' },
 ];
 
 export const ANALYTICS_MAX_ROWS = 1000;

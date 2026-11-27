@@ -72,9 +72,6 @@ export default function DevicesScreen() {
     <View style={styles.header}>
       <View style={styles.titleBlock}>
         <Text style={styles.title}>Dispositivos</Text>
-        <Text style={styles.subtitle}>
-          Toca un dispositivo para usarlo como activo en el Panel, el Historial y Control.
-        </Text>
       </View>
       <Button label="Registrar dispositivo" onPress={() => setFormState({ mode: 'create' })} />
       {error ? <FormMessage type="error" message={error} /> : null}

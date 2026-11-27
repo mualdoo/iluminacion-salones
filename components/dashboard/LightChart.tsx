@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/dashboard/Card';
-import { LIGHT_UNIT, MAX_LIGHT_LEVEL } from '@/constants/dashboard';
+import { MAX_LIGHT_LEVEL } from '@/constants/dashboard';
 import { colors, spacing, tones } from '@/constants/theme';
 import type { LightSample } from '@/types/dashboard';
 import { LIGHT_BANDS, formatClock, getLightBand } from '@/utils/dashboard';
@@ -21,11 +21,6 @@ export function LightChart({ samples }: Props) {
 
   return (
     <Card title="Historial de iluminación" icon="stats-chart-outline">
-      <Text style={styles.subtitle}>
-        {samples.length === 0
-          ? `Nivel en ${LIGHT_UNIT} (0–${MAX_LIGHT_LEVEL})`
-          : `Nivel en ${LIGHT_UNIT} (0–${MAX_LIGHT_LEVEL}) · últimos ${samples.length} registros`}
-      </Text>
 
       {samples.length === 0 ? (
         <Text style={styles.empty}>Aún no hay mediciones de iluminación para graficar.</Text>
@@ -85,7 +80,7 @@ export function LightChart({ samples }: Props) {
           <View key={band.label} style={styles.legendItem}>
             <View style={[styles.dot, { backgroundColor: tones[band.tone].fg }]} />
             <Text style={styles.legendText}>
-              {band.label} ({band.range})
+              {band.label}
             </Text>
           </View>
         ))}

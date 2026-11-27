@@ -66,7 +66,7 @@ export function TimeBandsCard({ bands }: { bands: TimeBandStats[] }) {
 
       <Text style={styles.note}>
         Horario local del teléfono. Barras de movimiento relativas a la franja con más eventos;
-        barras de iluminación sobre la escala 0–{MAX_LIGHT_LEVEL}.
+        barras de iluminación sobre la escala 0-{MAX_LIGHT_LEVEL}.
       </Text>
     </Card>
   );
