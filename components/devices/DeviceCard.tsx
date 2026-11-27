@@ -15,9 +15,18 @@ type Props = {
   onSelect: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onShowCredentials: () => void;
 };
 
-export function DeviceCard({ device, isActive, isBusy, onSelect, onEdit, onDelete }: Props) {
+export function DeviceCard({
+  device,
+  isActive,
+  isBusy,
+  onSelect,
+  onEdit,
+  onDelete,
+  onShowCredentials,
+}: Props) {
   const status = DEVICE_STATUS_META[device.status];
 
   return (
@@ -50,6 +59,16 @@ export function DeviceCard({ device, isActive, isBusy, onSelect, onEdit, onDelet
         </View>
 
         <View style={styles.actions}>
+          <Pressable
+            onPress={onShowCredentials}
+            disabled={isBusy}
+            accessibilityRole="button"
+            accessibilityLabel={`Ver credenciales ESP32 de ${device.name}`}
+            style={({ pressed }) => [styles.action, (pressed || isBusy) && styles.pressed]}
+          >
+            <Ionicons name="key-outline" size={16} color={colors.text} />
+            <Text style={styles.actionLabel}>Credenciales ESP32</Text>
+          </Pressable>
           <Pressable
             onPress={onEdit}
             disabled={isBusy}
@@ -93,7 +112,7 @@ const styles = StyleSheet.create({
   description: { fontSize: 13, lineHeight: 18, color: colors.textMuted },
   statusRow: { gap: spacing.sm },
   lastSeen: { fontSize: 12, color: colors.textMuted },
-  actions: { flexDirection: 'row', gap: spacing.sm },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   action: {
     flexDirection: 'row',
     alignItems: 'center',

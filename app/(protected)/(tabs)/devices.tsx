@@ -4,6 +4,7 @@ import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, V
 
 import { Button } from '@/components/Button';
 import { DeviceCard } from '@/components/devices/DeviceCard';
+import { DeviceCredentialsModal } from '@/components/devices/DeviceCredentialsModal';
 import { DeviceFormModal } from '@/components/devices/DeviceFormModal';
 import { EmptyState } from '@/components/EmptyState';
 import { FormMessage } from '@/components/FormMessage';
@@ -28,6 +29,7 @@ export default function DevicesScreen() {
   } = useDevices();
 
   const [formState, setFormState] = useState<FormState>(null);
+  const [credentialsDevice, setCredentialsDevice] = useState<Device | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -108,6 +110,7 @@ export default function DevicesScreen() {
             onSelect={() => selectDevice(item.id)}
             onEdit={() => setFormState({ mode: 'edit', device: item })}
             onDelete={() => handleDelete(item)}
+            onShowCredentials={() => setCredentialsDevice(item)}
           />
         )}
         ListHeaderComponent={header}
@@ -128,12 +131,24 @@ export default function DevicesScreen() {
                 }
               : undefined
           }
-          onSubmit={(input) =>
-            formState.mode === 'edit'
-              ? updateDevice(formState.device.id, input)
-              : createDevice(input)
-          }
+          onSubmit={async (input) => {
+            if (formState.mode === 'edit') {
+              return updateDevice(formState.device.id, input);
+            }
+            const result = await createDevice(input);
+            // Al crear un dispositivo, se abren sus credenciales automáticamente.
+            if (result.ok) setCredentialsDevice(result.data);
+            return result;
+          }}
           onClose={() => setFormState(null)}
+        />
+      ) : null}
+
+      {credentialsDevice ? (
+        <DeviceCredentialsModal
+          key={credentialsDevice.id}
+          device={credentialsDevice}
+          onClose={() => setCredentialsDevice(null)}
         />
       ) : null}
     </ScreenContainer>
