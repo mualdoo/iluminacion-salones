@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { StatePill } from '@/components/dashboard/StatePill';
 import { colors, radius, spacing } from '@/constants/theme';
 import { formatDateTime } from '@/utils/format';
 
@@ -15,7 +14,12 @@ export function RealDataBar({ lastMeasurementAt, isRefreshing, onRefresh }: Prop
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <StatePill label="Datos reales" tone="success" icon="cloud-done-outline" />
+        <Text style={styles.caption}>
+          {lastMeasurementAt
+            ? `Última medición: ${formatDateTime(lastMeasurementAt)}`
+            : 'Sin mediciones registradas'}
+        </Text>
+        {/* <StatePill label="Datos reales" tone="success" icon="cloud-done-outline" /> */}
         <Pressable
           onPress={onRefresh}
           disabled={isRefreshing}
@@ -31,11 +35,6 @@ export function RealDataBar({ lastMeasurementAt, isRefreshing, onRefresh }: Prop
           <Text style={styles.refreshLabel}>Actualizar</Text>
         </Pressable>
       </View>
-      <Text style={styles.caption}>
-        {lastMeasurementAt
-          ? `Última medición: ${formatDateTime(lastMeasurementAt)}`
-          : 'Sin mediciones registradas'}
-      </Text>
     </View>
   );
 }

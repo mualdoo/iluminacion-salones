@@ -4,16 +4,21 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/dashboard/Card';
 import { StatePill } from '@/components/dashboard/StatePill';
+import { MAX_LIGHT_LEVEL } from '@/constants/dashboard';
 import { colors, spacing } from '@/constants/theme';
 import type { ConnectionStatus } from '@/types/dashboard';
 import type { IconName } from '@/types/ui';
+import { getLightBand } from '@/utils/dashboard';
 
 type Props = {
   occupied: boolean;
-  /** null = sin dato (aún no hay información real de la luminaria). */
+  /** null = sin dato. */
   lampOn: boolean | null;
+  /** true si el estado de la luminaria viene de un comando aún no ejecutado. */
+  lampPending?: boolean;
   /** 'pending' = dispositivo registrado que todavía no se ha conectado. */
   connection: ConnectionStatus | 'pending';
+  level: number | null;
 };
 
 function StatusRow({ icon, label, children }: { icon: IconName; label: string; children: ReactNode }) {
@@ -30,15 +35,32 @@ function StatusRow({ icon, label, children }: { icon: IconName; label: string; c
   );
 }
 
-function LampPill({ lampOn }: { lampOn: boolean | null }) {
+function LampPill({ lampOn, pending }: { lampOn: boolean | null; pending: boolean }) {
   if (lampOn === null) {
     return <StatePill label="Sin datos" tone="neutral" icon="help-circle-outline" />;
   }
+  const suffix = pending ? ' (P)' : '';
   return (
     <StatePill
-      label={lampOn ? 'Encendida' : 'Apagada'}
+      label={`${lampOn ? 'Encendida' : 'Apagada'}${suffix}`}
       tone={lampOn ? 'warning' : 'neutral'}
       icon={lampOn ? 'bulb' : 'bulb-outline'}
+    />
+  );
+}
+
+function LightPill({ level }: { level: number | null }) {
+  if (level === null) {
+    return <StatePill label="Sin datos" tone="neutral" icon="help-circle-outline" />;
+  }
+  const clamped = Math.min(MAX_LIGHT_LEVEL, Math.max(0, level));
+  const band = getLightBand(clamped);
+  const percent = Math.round((clamped / MAX_LIGHT_LEVEL) * 100);
+  return (
+    <StatePill
+      label={band.label}
+      tone={band.tone}
+      icon="sunny-outline"
     />
   );
 }
@@ -53,7 +75,7 @@ function ConnectionPill({ connection }: { connection: Props['connection'] }) {
   return <StatePill label="Desconectado" tone="error" icon="alert-circle-outline" />;
 }
 
-export function RoomStatusSection({ occupied, lampOn, connection }: Props) {
+export function RoomStatusSection({ occupied, lampOn, lampPending = false, connection, level }: Props) {
   return (
     <Card title="Estado del salón" icon="home-outline">
       <View style={styles.list}>
@@ -64,8 +86,11 @@ export function RoomStatusSection({ occupied, lampOn, connection }: Props) {
             icon={occupied ? 'people' : 'people-outline'}
           />
         </StatusRow>
-        <StatusRow icon="bulb-outline" label="Iluminación">
-          <LampPill lampOn={lampOn} />
+        <StatusRow icon="sunny-outline" label="Iluminación">
+          <LightPill level={level} />
+        </StatusRow>
+        <StatusRow icon="bulb-outline" label="Luz">
+          <LampPill lampOn={lampOn} pending={lampPending} />
         </StatusRow>
         <StatusRow icon="hardware-chip-outline" label="Dispositivo">
           <ConnectionPill connection={connection} />

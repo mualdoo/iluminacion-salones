@@ -1,20 +1,22 @@
 import { StyleSheet, Text } from 'react-native';
 
+import { AlertsSection } from '@/components/dashboard/AlertsSection';
 import { Card } from '@/components/dashboard/Card';
 import { LightChart } from '@/components/dashboard/LightChart';
 import { LightLevelCard } from '@/components/dashboard/LightLevelCard';
 import { MotionCard } from '@/components/dashboard/MotionCard';
-import { RecentMeasurements } from '@/components/dashboard/RecentMeasurements';
 import { RoomStatusSection } from '@/components/dashboard/RoomStatusSection';
-import { OCCUPANCY_WINDOW_MINUTES } from '@/constants/measurements';
 import { colors } from '@/constants/theme';
-import type { Device } from '@/types/database';
+import type { Command, Configuration, Device } from '@/types/database';
 import type { RealDashboardData } from '@/types/measurements';
 import type { IconName } from '@/types/ui';
+import { analyzeRealDevice } from '@/utils/deviceState';
 
 type Props = {
   data: RealDashboardData;
   device: Device;
+  configuration: Configuration | null;
+  commands: Command[];
 };
 
 function NoDataCard({ title, icon, message }: { title: string; icon: IconName; message: string }) {
@@ -25,38 +27,36 @@ function NoDataCard({ title, icon, message }: { title: string; icon: IconName; m
   );
 }
 
-export function RealDashboardContent({ data, device }: Props) {
+export function RealDashboardContent({ data, device, configuration, commands }: Props) {
+  const { occupied, lamp, alerts } = analyzeRealDevice({
+    device,
+    data,
+    configuration,
+    commands,
+    now: Date.now(),
+  });
+  const isOccupied = occupied ?? false;
+
   const connection =
     device.status === 'online' ? 'connected' : device.status === 'offline' ? 'disconnected' : 'pending';
-
-  // Ocupado si hubo movimiento (valor 1) dentro de la ventana de ocupación.
-  const occupied =
-    data.lastMotionDetectedAt !== null &&
-    data.fetchedAt - data.lastMotionDetectedAt <= OCCUPANCY_WINDOW_MINUTES * 60_000;
+  const mode = configuration ? (configuration.automatic_mode ? 'automatic' : 'manual') : null;
 
   return (
     <>
-      <RoomStatusSection occupied={occupied} lampOn={null} connection={connection} />
-
-      {data.latestLight ? (
-        <LightLevelCard
-          level={data.latestLight.value}
-          simulated={false}
-          measuredAt={new Date(data.latestLight.recorded_at).getTime()}
-        />
-      ) : (
-        <NoDataCard
-          title="Nivel de iluminación"
-          icon="sunny-outline"
-          message="Este dispositivo aún no tiene mediciones de iluminación."
-        />
-      )}
+      <RoomStatusSection
+        occupied={isOccupied}
+        lampOn={lamp.on}
+        lampPending={lamp.pending}
+        connection={connection}
+        level={data.latestLight ? data.latestLight.value : null}
+      />
+      
+      <AlertsSection alerts={alerts} />
 
       {data.latestMotion ? (
         <MotionCard
           motionDetected={data.latestMotion.value === 1}
-          occupied={occupied}
-          simulated={false}
+          occupied={isOccupied}
           lastReadingAt={new Date(data.latestMotion.recorded_at).getTime()}
         />
       ) : (
@@ -67,14 +67,20 @@ export function RealDashboardContent({ data, device }: Props) {
         />
       )}
 
-      <NoDataCard
-        title="Estado de la luminaria"
-        icon="flash-outline"
-        message="Aún no hay datos reales de la luminaria. Se mostrarán cuando se habilite el control del LED en una fase posterior."
-      />
+      {data.latestLight ? (
+        <LightLevelCard
+          level={data.latestLight.value}
+          measuredAt={new Date(data.latestLight.recorded_at).getTime()}
+        />
+      ) : (
+        <NoDataCard
+          title="Nivel de iluminación"
+          icon="sunny-outline"
+          message="Este dispositivo aún no tiene mediciones de iluminación."
+        />
+      )}
 
-      <LightChart samples={data.lightSamples} simulated={false} />
-      <RecentMeasurements measurements={data.recent} />
+      <LightChart samples={data.lightSamples} />
     </>
   );
 }

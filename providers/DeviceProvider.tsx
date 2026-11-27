@@ -1,20 +1,22 @@
 import {
-    createContext,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-    type ReactNode,
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
 } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
 import { loadActiveDeviceId, saveActiveDeviceId } from '@/services/devices/activeDeviceStorage';
 import {
-    deleteDeviceById,
-    fetchDevices,
-    insertDevice,
-    updateDeviceById,
+  deleteDeviceById,
+  ensureDeviceToken,
+  fetchDevices,
+  insertDevice,
+  updateDeviceById,
+  type DeviceTokenResult,
 } from '@/services/devices/deviceService';
 import type { Device } from '@/types/database';
 import type { DeviceInput, ServiceResult } from '@/types/service';
@@ -30,6 +32,7 @@ type DeviceContextValue = {
   createDevice: (input: DeviceInput) => Promise<ServiceResult<Device>>;
   updateDevice: (id: string, input: DeviceInput) => Promise<ServiceResult<Device>>;
   deleteDevice: (id: string) => Promise<ServiceResult<null>>;
+  getDeviceToken: (id: string) => Promise<ServiceResult<DeviceTokenResult>>;
 };
 
 export const DeviceContext = createContext<DeviceContextValue | undefined>(undefined);
@@ -97,6 +100,8 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
       if (result.ok) {
         setDevices((prev) => [...prev, result.data]);
         if (!activeIdRef.current) applyActive(result.data.id);
+        // Genera y guarda el token. Si falla, el modal de credenciales lo reintenta al abrirse.
+        await ensureDeviceToken(result.data.id);
       }
       return result;
     },
@@ -143,6 +148,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
       createDevice,
       updateDevice,
       deleteDevice,
+      getDeviceToken: ensureDeviceToken,
     }),
     [
       devices,

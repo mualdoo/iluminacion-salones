@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 
 import { Button } from '@/components/Button';
@@ -66,11 +66,6 @@ export function DeviceFormModal({ mode, initialValues, onSubmit, onClose }: Prop
           <View style={styles.sheet}>
             <Text style={styles.title}>
               {mode === 'create' ? 'Registrar dispositivo' : 'Editar dispositivo'}
-            </Text>
-            <Text style={styles.subtitle}>
-              {mode === 'create'
-                ? 'Registra un salón. Podrás vincular el ESP32 en una fase posterior.'
-                : 'Puedes cambiar el nombre y la descripción.'}
             </Text>
 
             {formError ? <FormMessage type="error" message={formError} /> : null}

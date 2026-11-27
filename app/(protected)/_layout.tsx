@@ -1,57 +1,14 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Stack } from 'expo-router';
 
-import { colors } from '@/constants/theme';
 import { DeviceProvider } from '@/providers/DeviceProvider';
 
 export default function ProtectedLayout() {
   return (
     <DeviceProvider>
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: colors.warning,
-          tabBarInactiveTintColor: colors.textMuted,
-          tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
-          tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
-        }}
-      >
-        <Tabs.Screen
-          name="home"
-          options={{
-            title: 'Panel',
-            tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons
-                name={focused ? 'speedometer' : 'speedometer-outline'}
-                size={size}
-                color={String(color)}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="devices"
-          options={{
-            title: 'Dispositivos',
-            tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons
-                name={focused ? 'hardware-chip' : 'hardware-chip-outline'}
-                size={size}
-                color={String(color)}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="history"
-          options={{
-            title: 'Historial',
-            tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons name={focused ? 'time' : 'time-outline'} size={size} color={String(color)} />
-            ),
-          }}
-        />
-      </Tabs>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="stats" />
+      </Stack>
     </DeviceProvider>
   );
 }

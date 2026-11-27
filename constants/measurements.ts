@@ -4,7 +4,7 @@ export const HISTORY_PAGE_SIZE = 50;
 export const DASHBOARD_LIGHT_SAMPLES = 12;
 export const DASHBOARD_MOTION_SAMPLES = 5;
 export const DASHBOARD_RECENT_COUNT = 6;
-export const OCCUPANCY_WINDOW_MINUTES = 5;
+export const OCCUPANCY_WINDOW_SECONDS = 30;
 
 export const TYPE_FILTERS: ReadonlyArray<{ key: MeasurementTypeFilter; label: string }> = [
   { key: 'all', label: 'Todos' },
