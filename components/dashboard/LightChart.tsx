@@ -14,10 +14,9 @@ const LABEL_EVERY = 4;
 
 type Props = {
   samples: LightSample[];
-  simulated?: boolean;
 };
 
-export function LightChart({ samples, simulated = true }: Props) {
+export function LightChart({ samples }: Props) {
   const lastIndex = samples.length - 1;
 
   return (
@@ -25,9 +24,7 @@ export function LightChart({ samples, simulated = true }: Props) {
       <Text style={styles.subtitle}>
         {samples.length === 0
           ? `Nivel en ${LIGHT_UNIT} (0–${MAX_LIGHT_LEVEL})`
-          : `Nivel en ${LIGHT_UNIT} (0–${MAX_LIGHT_LEVEL}) · últimos ${samples.length} registros ${
-              simulated ? 'simulados' : 'reales'
-            }`}
+          : `Nivel en ${LIGHT_UNIT} (0–${MAX_LIGHT_LEVEL}) · últimos ${samples.length} registros`}
       </Text>
 
       {samples.length === 0 ? (

@@ -57,7 +57,6 @@ export function RealDashboardContent({ data, device, configuration, commands }: 
       {data.latestLight ? (
         <LightLevelCard
           level={data.latestLight.value}
-          simulated={false}
           measuredAt={new Date(data.latestLight.recorded_at).getTime()}
         />
       ) : (
@@ -72,7 +71,6 @@ export function RealDashboardContent({ data, device, configuration, commands }: 
         <MotionCard
           motionDetected={data.latestMotion.value === 1}
           occupied={isOccupied}
-          simulated={false}
           lastReadingAt={new Date(data.latestMotion.recorded_at).getTime()}
         />
       ) : (
@@ -86,12 +84,11 @@ export function RealDashboardContent({ data, device, configuration, commands }: 
       <LampCard
         lampOn={lamp.on}
         mode={mode}
-        simulated={false}
         pending={lamp.pending}
         sourceNote={describeLampSource(lamp)}
       />
 
-      <LightChart samples={data.lightSamples} simulated={false} />
+      <LightChart samples={data.lightSamples} />
       <RecentMeasurements measurements={data.recent} alerts={alerts} />
     </>
   );

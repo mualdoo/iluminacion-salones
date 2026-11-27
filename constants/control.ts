@@ -5,9 +5,6 @@ export const LIGHT_THRESHOLD_MAX = 1000;
 export const LIGHT_THRESHOLD_STEP = 50;
 export const LIGHT_THRESHOLD_PRESETS = [300, 500, 700] as const;
 
-// Umbral usado por las alertas del modo simulado (el mismo con que el simulador enciende la luz).
-export const SIMULATED_LIGHT_THRESHOLD = 400;
-
 export const COMMANDS_LIMIT = 20;
 export const COMMANDS_POLL_MS = 10_000;
 // En modo automático, un comando ejecutado más viejo que esto ya no define el estado de la luz.

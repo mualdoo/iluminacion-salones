@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/dashboard/Card';
-import { StatePill } from '@/components/dashboard/StatePill';
 import { LIGHT_UNIT, MAX_LIGHT_LEVEL } from '@/constants/dashboard';
 import { colors, radius, spacing, tones } from '@/constants/theme';
 import { getLightBand } from '@/utils/dashboard';
@@ -10,28 +9,18 @@ import { formatDateTime } from '@/utils/format';
 
 type Props = {
   level: number;
-  simulated?: boolean;
-  /** Marca de tiempo (ms) de la medición real. */
+  /** Marca de tiempo (ms) de la medición. */
   measuredAt?: number | null;
 };
 
-export function LightLevelCard({ level, simulated = true, measuredAt = null }: Props) {
+export function LightLevelCard({ level, measuredAt = null }: Props) {
   const clamped = Math.min(MAX_LIGHT_LEVEL, Math.max(0, level));
   const band = getLightBand(clamped);
   const percent = Math.round((clamped / MAX_LIGHT_LEVEL) * 100);
 
   return (
-    <Card
-      title="Nivel de iluminación"
-      icon="sunny-outline"
-      right={<StatePill label={band.label} tone={band.tone} />}
-    >
-      <View style={styles.valueRow}>
-        <Text style={styles.value}>{Math.round(level)}</Text>
-        <Text style={styles.unit}>
-          / {MAX_LIGHT_LEVEL} {LIGHT_UNIT}
-        </Text>
-      </View>
+    <Card title="Nivel de iluminación" icon="sunny-outline">
+      <Text style={[styles.level, { color: tones[band.tone].fg }]}>{band.label}</Text>
 
       <View>
         <View style={styles.track}>
@@ -46,16 +35,12 @@ export function LightLevelCard({ level, simulated = true, measuredAt = null }: P
         </View>
       </View>
 
-      {!simulated && measuredAt ? (
-        <Text style={styles.caption}>Medición: {formatDateTime(measuredAt)}</Text>
-      ) : null}
+      {measuredAt ? <Text style={styles.caption}>Medición: {formatDateTime(measuredAt)}</Text> : null}
 
       <View style={styles.note}>
         <Ionicons name="information-circle-outline" size={16} color={colors.info} />
         <Text style={styles.noteText}>
-          {simulated
-            ? `Valor simulado en unidades relativas (${LIGHT_UNIT}). No es una medición real en lux.`
-            : `Valor del sensor en unidades relativas (${LIGHT_UNIT}). Aún no está calibrado en lux.`}
+          Valor del sensor en unidades relativas ({LIGHT_UNIT}). Aún no está calibrado en lux.
         </Text>
       </View>
     </Card>
@@ -63,9 +48,7 @@ export function LightLevelCard({ level, simulated = true, measuredAt = null }: P
 }
 
 const styles = StyleSheet.create({
-  valueRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
-  value: { fontSize: 48, fontWeight: '700', color: colors.text },
-  unit: { fontSize: 16, color: colors.textMuted },
+  level: { fontSize: 40, fontWeight: '700' },
   track: {
     height: 12,
     borderRadius: radius.pill,

@@ -10,12 +10,11 @@ import { formatDateTime } from '@/utils/format';
 type Props = {
   motionDetected: boolean;
   occupied: boolean;
-  simulated?: boolean;
   /** Marca de tiempo (ms) de la última lectura real. */
   lastReadingAt?: number | null;
 };
 
-export function MotionCard({ motionDetected, occupied, simulated = true, lastReadingAt = null }: Props) {
+export function MotionCard({ motionDetected, occupied, lastReadingAt = null }: Props) {
   const tone = tones[motionDetected ? 'info' : 'neutral'];
 
   return (
@@ -28,8 +27,8 @@ export function MotionCard({ motionDetected, occupied, simulated = true, lastRea
           <Text style={styles.state}>
             {motionDetected ? 'Movimiento detectado' : 'Sin movimiento'}
           </Text>
-          <Text style={styles.sensor}>{simulated ? 'Sensor PIR (simulado)' : 'Sensor PIR'}</Text>
-          {!simulated && lastReadingAt ? (
+          <Text style={styles.sensor}>Sensor PIR</Text>
+          {lastReadingAt ? (
             <Text style={styles.sensor}>Última lectura: {formatDateTime(lastReadingAt)}</Text>
           ) : null}
         </View>
@@ -43,9 +42,7 @@ export function MotionCard({ motionDetected, occupied, simulated = true, lastRea
         />
       </View>
       <Text style={styles.hint}>
-        {simulated
-          ? 'Se estima ocupado mientras haya movimiento reciente en el salón.'
-          : `Se estima ocupado si se detectó movimiento en los últimos ${OCCUPANCY_WINDOW_SECONDS} segundos.`}
+        Se estima ocupado si se detectó movimiento en los últimos ${OCCUPANCY_WINDOW_SECONDS} segundos.
       </Text>
     </Card>
   );

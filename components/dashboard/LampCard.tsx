@@ -11,7 +11,6 @@ type Props = {
   lampOn: boolean | null;
   /** null = sin configuración. */
   mode: OperationMode | null;
-  simulated?: boolean;
   pending?: boolean;
   /** Explica de dónde sale el estado (modo real). */
   sourceNote?: string | null;
@@ -20,7 +19,6 @@ type Props = {
 export function LampCard({
   lampOn,
   mode,
-  simulated = true,
   pending = false,
   sourceNote = null,
 }: Props) {
@@ -42,7 +40,7 @@ export function LampCard({
         </View>
         <View style={styles.texts}>
           <Text style={styles.state}>{stateLabel}</Text>
-          <Text style={styles.sub}>{simulated ? 'LED del salón (simulado)' : 'LED del salón'}</Text>
+          <Text style={styles.sub}>LED del salón</Text>
         </View>
       </View>
 
@@ -60,9 +58,7 @@ export function LampCard({
       </View>
 
       <Text style={styles.hint}>
-        {simulated
-          ? 'Datos simulados. El control real de la luz está en la pestaña Control.'
-          : (sourceNote ?? 'El control de la luz está en la pestaña Control.')}
+        {sourceNote ?? 'El control de la luz está en la pestaña Control.'}
       </Text>
     </Card>
   );
