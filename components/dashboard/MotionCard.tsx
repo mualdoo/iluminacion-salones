@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/dashboard/Card';
+import { OCCUPANCY_WINDOW_SECONDS } from '@/constants/measurements';
 import { colors, spacing, tones } from '@/constants/theme';
 import { formatDateTime } from '@/utils/format';
 
@@ -30,6 +31,9 @@ export function MotionCard({ motionDetected, occupied, lastReadingAt = null }: P
           ) : null}
         </View>
       </View>
+      <Text style={styles.hint}>
+        Se estima ocupado si se detectó movimiento en los últimos {OCCUPANCY_WINDOW_SECONDS} segundos.
+      </Text>
     </Card>
   );
 }

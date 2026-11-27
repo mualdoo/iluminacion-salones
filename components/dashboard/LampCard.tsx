@@ -26,10 +26,10 @@ export function LampCard({
   const stateLabel =
     lampOn === null
       ? 'Sin datos'
-      : `${lampOn ? 'Luz encendida' : 'Luz apagada'}${pending ? ' (pendiente)' : ''}`;
+      : `${lampOn ? 'Encendida' : 'Apagada'}${pending ? ' (pendiente)' : ''}`;
 
   return (
-    <Card title="Estado de la luminaria" icon="flash-outline">
+    <Card title="Luz" icon="flash-outline">
       <View style={styles.main}>
         <View style={[styles.circle, { backgroundColor: tone.bg }]}>
           <Ionicons

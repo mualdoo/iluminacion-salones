@@ -5,7 +5,6 @@ import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text,
 import { CommandList } from '@/components/control/CommandList';
 import { ConfigurationCard } from '@/components/control/ConfigurationCard';
 import { LampControlCard } from '@/components/control/LampControlCard';
-import { AlertsSection } from '@/components/dashboard/AlertsSection';
 import { ActiveDeviceBar } from '@/components/devices/ActiveDeviceBar';
 import { EmptyState } from '@/components/EmptyState';
 import { FormMessage } from '@/components/FormMessage';
@@ -96,10 +95,9 @@ export default function ControlScreen() {
     if (config.configuration?.automatic_mode) {
       Alert.alert(
         'Modo automático activo',
-        'El dispositivo decide por sí solo según el umbral y la presencia. ¿Qué quieres hacer?',
+        'El dispositivo decide por sí solo según el umbral y la presencia.',
         [
           { text: 'Cancelar', style: 'cancel' },
-          { text: 'Solo este comando', onPress: () => void executeSend(value, false) },
           { text: 'Cambiar a manual y enviar', onPress: () => void executeSend(value, true) },
         ],
       );
@@ -196,8 +194,6 @@ export default function ControlScreen() {
           onSwitchToManual={handleSwitchToManual}
         />
 
-        <AlertsSection alerts={alerts} showWhenEmpty />
-
         {renderConfiguration()}
 
         {commands.isLoading ? (
@@ -223,9 +219,6 @@ export default function ControlScreen() {
       >
         <View style={styles.titleBlock}>
           <Text style={styles.title}>Control</Text>
-          <Text style={styles.subtitle}>
-            Configura el modo y el umbral, y controla la luz del dispositivo activo.
-          </Text>
         </View>
 
         <ActiveDeviceBar device={activeDevice} onManage={goToDevices} />

@@ -2,17 +2,15 @@ import { StyleSheet, Text } from 'react-native';
 
 import { AlertsSection } from '@/components/dashboard/AlertsSection';
 import { Card } from '@/components/dashboard/Card';
-import { LampCard } from '@/components/dashboard/LampCard';
 import { LightChart } from '@/components/dashboard/LightChart';
 import { LightLevelCard } from '@/components/dashboard/LightLevelCard';
 import { MotionCard } from '@/components/dashboard/MotionCard';
-import { RecentMeasurements } from '@/components/dashboard/RecentMeasurements';
 import { RoomStatusSection } from '@/components/dashboard/RoomStatusSection';
 import { colors } from '@/constants/theme';
 import type { Command, Configuration, Device } from '@/types/database';
 import type { RealDashboardData } from '@/types/measurements';
 import type { IconName } from '@/types/ui';
-import { analyzeRealDevice, describeLampSource } from '@/utils/deviceState';
+import { analyzeRealDevice } from '@/utils/deviceState';
 
 type Props = {
   data: RealDashboardData;
@@ -50,6 +48,7 @@ export function RealDashboardContent({ data, device, configuration, commands }: 
         lampOn={lamp.on}
         lampPending={lamp.pending}
         connection={connection}
+        level={data.latestLight ? data.latestLight.value : null}
       />
       
       <AlertsSection alerts={alerts} />
@@ -81,15 +80,7 @@ export function RealDashboardContent({ data, device, configuration, commands }: 
         />
       )}
 
-      <LampCard
-        lampOn={lamp.on}
-        mode={mode}
-        pending={lamp.pending}
-        sourceNote={describeLampSource(lamp)}
-      />
-
       <LightChart samples={data.lightSamples} />
-      <RecentMeasurements measurements={data.recent} alerts={alerts} />
     </>
   );
 }

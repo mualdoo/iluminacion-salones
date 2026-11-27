@@ -223,7 +223,6 @@ export function ConfigurationCard({ configuration, isSaving, onSave }: Props) {
             );
           })}
         </View>
-        <Text style={styles.hint}>{MODES.find((m) => m.automatic === automatic)?.description}</Text>
       </View>
 
       {automatic ? (
@@ -236,7 +235,6 @@ export function ConfigurationCard({ configuration, isSaving, onSave }: Props) {
           </View>
           <View style={styles.descriptionBox}>
             <Text style={styles.descriptionTitle}>{selectedLevel.title}</Text>
-            <Text style={styles.descriptionText}>{selectedLevel.description}</Text>
           </View>
         </View>
       ) : null}

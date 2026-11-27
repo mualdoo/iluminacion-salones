@@ -1,5 +1,5 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet } from 'react-native';
 
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
@@ -17,8 +17,6 @@ import { useDeviceConfiguration } from '@/hooks/useDeviceConfiguration';
 import { useDevices } from '@/hooks/useDevices';
 import { useRealDashboard } from '@/hooks/useRealDashboard';
 import { signOut } from '@/services/auth/authService';
-import { computeDeviceStats } from '@/utils/analytics';
-import { generateDeviceRecommendations } from '@/utils/recommendations';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -35,19 +33,6 @@ export default function HomeScreen() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
 
-  // Recomendación principal con las últimas 24 h.
-  const cfg = configuration.configuration;
-  const topRecommendation = useMemo(() => {
-    if (!analytics.data) return null;
-    const stats = computeDeviceStats({
-      measurements: analytics.data.measurements,
-      commands: analytics.data.commands,
-      threshold: cfg?.light_threshold ?? null,
-      automaticMode: cfg ? cfg.automatic_mode : null,
-    });
-    return generateDeviceRecommendations({ stats, configuration: cfg })[0] ?? null;
-  }, [analytics.data, cfg]);
-
   // Mantiene al día el estado y la última conexión del dispositivo.
   useFocusEffect(
     useCallback(() => {
@@ -56,7 +41,6 @@ export default function HomeScreen() {
   );
 
   const goToDevices = () => router.navigate('/devices');
-  const goToStats = () => router.navigate('/stats');
 
   const refreshAll = async () => {
     setIsRefreshing(true);
@@ -145,10 +129,6 @@ export default function HomeScreen() {
         {signOutError ? <FormMessage type="error" message={signOutError} /> : null}
 
         <ActiveDeviceBar device={activeDevice} onManage={goToDevices} />
-
-        {/* {activeDevice ? (
-          <StatsLinkCard recommendation={topRecommendation} onPress={goToStats} />
-        ) : null} */}
 
         {real.error ? <FormMessage type="error" message={real.error} /> : null}
 
