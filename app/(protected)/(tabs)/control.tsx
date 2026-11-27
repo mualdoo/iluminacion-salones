@@ -187,8 +187,6 @@ export default function ControlScreen() {
         {feedback ? <FormMessage type={feedback.type} message={feedback.message} /> : null}
         {commands.error ? <FormMessage type="error" message={commands.error} /> : null}
 
-        <AlertsSection alerts={alerts} showWhenEmpty />
-
         <LampControlCard
           lamp={lamp}
           automaticMode={config.configuration ? config.configuration.automatic_mode : null}
@@ -197,6 +195,8 @@ export default function ControlScreen() {
           onSend={handleSend}
           onSwitchToManual={handleSwitchToManual}
         />
+
+        <AlertsSection alerts={alerts} showWhenEmpty />
 
         {renderConfiguration()}
 

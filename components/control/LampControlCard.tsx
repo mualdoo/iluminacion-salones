@@ -4,7 +4,6 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { Card } from '@/components/dashboard/Card';
 import { colors, radius, spacing, tones } from '@/constants/theme';
 import type { LampCommandValue, LampState } from '@/types/control';
-import type { IconName } from '@/types/ui';
 import { describeLampSource } from '@/utils/deviceState';
 
 type Props = {
@@ -17,38 +16,7 @@ type Props = {
   onSwitchToManual: () => void;
 };
 
-type ActionProps = {
-  label: string;
-  icon: IconName;
-  primary: boolean;
-  disabled: boolean;
-  loading: boolean;
-  onPress: () => void;
-};
-
-function ActionButton({ label, icon, primary, disabled, loading, onPress }: ActionProps) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ disabled }}
-      style={({ pressed }) => [
-        styles.action,
-        primary ? styles.actionPrimary : styles.actionSecondary,
-        (pressed || disabled) && styles.dimmed,
-      ]}
-    >
-      {loading ? (
-        <ActivityIndicator color={colors.text} />
-      ) : (
-        <Ionicons name={icon} size={26} color={colors.text} />
-      )}
-      <Text style={styles.actionLabel}>{label}</Text>
-    </Pressable>
-  );
-}
+const TRACK_OFF_BORDER = '#B8C0CC';
 
 export function LampControlCard({
   lamp,
@@ -60,6 +28,7 @@ export function LampControlCard({
 }: Props) {
   const tone = tones[lamp.on ? 'warning' : 'neutral'];
   const busy = isSending || isSwitching;
+  const isOn = lamp.on === true;
   const stateLabel =
     lamp.on === null
       ? 'Sin datos'
@@ -87,7 +56,7 @@ export function LampControlCard({
             <Ionicons name="sync-outline" size={18} color={colors.info} />
             <Text style={styles.noticeText}>
               El dispositivo está en modo automático y decide según el umbral y la presencia. Si
-              envías un comando, estarás anulando esa decisión de forma manual.
+              cambias la luz, estarás anulando esa decisión de forma manual.
             </Text>
           </View>
           <Pressable
@@ -107,29 +76,27 @@ export function LampControlCard({
         </View>
       ) : null}
 
-      <View style={styles.actions}>
-        <ActionButton
-          label="Encender luz"
-          icon="bulb"
-          primary
-          disabled={busy}
-          loading={false}
-          onPress={() => onSend('on')}
-        />
-        <ActionButton
-          label="Apagar luz"
-          icon="bulb-outline"
-          primary={false}
-          disabled={busy}
-          loading={false}
-          onPress={() => onSend('off')}
-        />
-      </View>
+      <Pressable
+        onPress={() => onSend(isOn ? 'off' : 'on')}
+        disabled={busy}
+        accessibilityRole="switch"
+        accessibilityLabel="Luz del salón"
+        accessibilityState={{ checked: isOn, disabled: busy }}
+        style={({ pressed }) => [styles.switchRow, (pressed || busy) && styles.dimmed]}
+      >
+        <View style={styles.switchTexts}>
+          <Text style={styles.switchLabel}>{isOn ? 'Encendida' : 'Apagada'}</Text>
+          <Text style={styles.switchHint}>
+            {isSending ? 'Enviando comando…' : 'Toca para cambiar el estado de la luz'}
+          </Text>
+        </View>
+        <View style={[styles.track, isOn ? styles.trackOn : styles.trackOff]}>
+          <View style={[styles.thumb, isOn ? styles.thumbOn : styles.thumbOff]} />
+        </View>
+      </Pressable>
 
-      {isSending ? <Text style={styles.hint}>Enviando comando…</Text> : null}
       <Text style={styles.hint}>
-        Los comandos quedan pendientes hasta que el dispositivo los ejecute. La conexión con el
-        ESP32 llegará en una fase posterior.
+        Los comandos quedan pendientes hasta que el dispositivo los ejecute.
       </Text>
     </Card>
   );
@@ -168,22 +135,33 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   noticeButtonLabel: { fontSize: 14, fontWeight: '600', color: colors.text },
-  actions: { flexDirection: 'row', gap: spacing.sm + 4 },
-  action: {
-    flex: 1,
-    height: 80,
+  switchRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs + 2,
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    padding: spacing.md,
     borderRadius: radius.lg,
-  },
-  actionPrimary: { backgroundColor: colors.primary },
-  actionSecondary: {
-    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
-  actionLabel: { fontSize: 15, fontWeight: '700', color: colors.text },
+  switchTexts: { flex: 1, gap: 2 },
+  switchLabel: { fontSize: 17, fontWeight: '700', color: colors.text },
+  switchHint: { fontSize: 12, color: colors.textMuted },
+  track: {
+    width: 68,
+    height: 38,
+    justifyContent: 'center',
+    padding: 3,
+    borderRadius: radius.pill,
+    borderWidth: 2,
+  },
+  trackOn: { backgroundColor: colors.primary, borderColor: colors.primary, alignItems: 'flex-end' },
+  trackOff: { backgroundColor: '#FFFFFF', borderColor: TRACK_OFF_BORDER, alignItems: 'flex-start' },
+  thumb: { width: 28, height: 28, borderRadius: 14 },
+  thumbOn: { backgroundColor: '#FFFFFF' },
+  thumbOff: { backgroundColor: TRACK_OFF_BORDER },
   dimmed: { opacity: 0.55 },
   hint: { fontSize: 12, lineHeight: 17, color: colors.textMuted },
 });
