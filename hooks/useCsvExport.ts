@@ -8,7 +8,7 @@ type Feedback = { type: 'error' | 'success'; message: string } | null;
 
 function describe(info: ExportInfo): string {
   const rows = info.rows > 0 ? ` con ${info.rows} fila${info.rows === 1 ? '' : 's'}` : '';
-  const base = `Archivo ${info.fileName} generado${rows}. Elige dónde guardarlo en el menú de compartir.`;
+  const base = `Archivo ${info.fileName} generado${rows}.`;
   return info.truncated
     ? `${base} Se exportaron solo los primeros ${info.rows} registros; acota el rango o los filtros para el resto.`
     : base;

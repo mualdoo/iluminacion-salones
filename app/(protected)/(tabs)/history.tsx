@@ -7,11 +7,10 @@ import { ActiveDeviceBar } from '@/components/devices/ActiveDeviceBar';
 import { EmptyState } from '@/components/EmptyState';
 import { FormMessage } from '@/components/FormMessage';
 import { FilterChips } from '@/components/measurements/FilterChips';
-import { HistorySummary } from '@/components/measurements/HistorySummary';
 import { MeasurementItem } from '@/components/measurements/MeasurementItem';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { EXPORT_MAX_ROWS } from '@/constants/analytics';
-import { LIGHT_VALUE_FILTERS, MOTION_VALUE_FILTERS, SORT_OPTIONS } from '@/constants/history';
+import { LIGHT_VALUE_FILTERS, MOTION_VALUE_FILTERS } from '@/constants/history';
 import { TIME_RANGES, TYPE_FILTERS } from '@/constants/measurements';
 import { colors, spacing } from '@/constants/theme';
 import { useCsvExport } from '@/hooks/useCsvExport';
@@ -81,9 +80,6 @@ export default function HistoryScreen() {
     <View style={styles.header}>
       <View style={styles.titleBlock}>
         <Text style={styles.title}>Historial</Text>
-        <Text style={styles.subtitle}>
-          Mediciones guardadas en Supabase para el dispositivo activo.
-        </Text>
       </View>
 
       <ActiveDeviceBar device={activeDevice} onManage={goToDevices} />
@@ -91,7 +87,6 @@ export default function HistoryScreen() {
       {activeDevice ? (
         <>
           <View style={styles.actions}>
-            <Button label="Ver estadísticas" variant="secondary" onPress={goToStats} />
             <Button
               label="Exportar historial (CSV)"
               variant="secondary"
@@ -107,32 +102,12 @@ export default function HistoryScreen() {
             <Text style={styles.filterLabel}>Tipo de medición</Text>
             <FilterChips options={TYPE_FILTERS} value={type} onChange={handleTypeChange} />
           </View>
-          {valueOptions ? (
-            <View style={styles.filterGroup}>
-              <Text style={styles.filterLabel}>
-                {type === 'light' ? 'Nivel respecto al umbral' : 'Estado del movimiento'}
-              </Text>
-              <FilterChips options={valueOptions} value={valueFilter} onChange={setValueFilter} />
-            </View>
-          ) : null}
           <View style={styles.filterGroup}>
             <Text style={styles.filterLabel}>Rango de tiempo</Text>
             <FilterChips options={TIME_RANGES} value={range} onChange={setRange} />
           </View>
-          <View style={styles.filterGroup}>
-            <Text style={styles.filterLabel}>Orden</Text>
-            <FilterChips options={SORT_OPTIONS} value={sort} onChange={setSort} />
-          </View>
 
           {measurements.error ? <FormMessage type="error" message={measurements.error} /> : null}
-          {!measurements.isLoading && measurements.items.length > 0 ? (
-            <HistorySummary
-              count={summary.count}
-              lightCount={summary.lightCount}
-              lightAverage={summary.lightAverage}
-              hasMore={measurements.hasMore}
-            />
-          ) : null}
         </>
       ) : null}
     </View>

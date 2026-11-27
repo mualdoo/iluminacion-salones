@@ -28,6 +28,19 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="control"
+        options={{
+          title: 'Control',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? 'toggle' : 'toggle-outline'}
+              size={size}
+              color={String(color)}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="devices"
         options={{
           title: 'Dispositivos',
@@ -47,19 +60,6 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'time' : 'time-outline'}
-              size={size}
-              color={String(color)}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="control"
-        options={{
-          title: 'Control',
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'toggle' : 'toggle-outline'}
               size={size}
               color={String(color)}
             />

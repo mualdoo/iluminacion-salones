@@ -79,15 +79,15 @@ export function RoomStatusSection({ occupied, lampOn, lampPending = false, conne
   return (
     <Card title="Estado del salón" icon="home-outline">
       <View style={styles.list}>
-        <StatusRow icon="sunny-outline" label="Iluminación">
-          <LightPill level={level} />
-        </StatusRow>
         <StatusRow icon="people-outline" label="Ocupación">
           <StatePill
             label={occupied ? 'Ocupado' : 'Desocupado'}
             tone={occupied ? 'info' : 'neutral'}
             icon={occupied ? 'people' : 'people-outline'}
           />
+        </StatusRow>
+        <StatusRow icon="sunny-outline" label="Iluminación">
+          <LightPill level={level} />
         </StatusRow>
         <StatusRow icon="bulb-outline" label="Luz">
           <LampPill lampOn={lampOn} pending={lampPending} />

@@ -53,19 +53,6 @@ export function RealDashboardContent({ data, device, configuration, commands }: 
       
       <AlertsSection alerts={alerts} />
 
-      {data.latestLight ? (
-        <LightLevelCard
-          level={data.latestLight.value}
-          measuredAt={new Date(data.latestLight.recorded_at).getTime()}
-        />
-      ) : (
-        <NoDataCard
-          title="Nivel de iluminación"
-          icon="sunny-outline"
-          message="Este dispositivo aún no tiene mediciones de iluminación."
-        />
-      )}
-
       {data.latestMotion ? (
         <MotionCard
           motionDetected={data.latestMotion.value === 1}
@@ -77,6 +64,19 @@ export function RealDashboardContent({ data, device, configuration, commands }: 
           title="Detección de movimiento"
           icon="walk-outline"
           message="Este dispositivo aún no tiene lecturas del sensor de movimiento."
+        />
+      )}
+
+      {data.latestLight ? (
+        <LightLevelCard
+          level={data.latestLight.value}
+          measuredAt={new Date(data.latestLight.recorded_at).getTime()}
+        />
+      ) : (
+        <NoDataCard
+          title="Nivel de iluminación"
+          icon="sunny-outline"
+          message="Este dispositivo aún no tiene mediciones de iluminación."
         />
       )}
 
